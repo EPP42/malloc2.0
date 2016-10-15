@@ -34,6 +34,7 @@ void *allocate_page (size_t size)
 				array[7].page_h->next_h = NULL; 
 				array[7].page_h->next = (pt_block)array[7].page_h->limit; 
 				array[7].page_h->next->free = 0; 
+    array[7].page_h->next->head = array[7].page_h;  
 				array[7].page_h->free = 0; 
 				array[7].page_h->next->next = NULL; 
 				array[7].page_h->size = size + HEAD_SIZE; 
@@ -51,6 +52,7 @@ void *allocate_page (size_t size)
 				tmp_s->size = size + HEAD_SIZE; 
 				tmp_s->next_h = NULL; 
 				tmp_s->next = (pt_block)array[7].page_h->limit; 
+    tmp_s->next->head = tmp_s; 
 				tmp_s->next->free = 0; 
 				return tmp_s->next->limit; 
 		}
@@ -70,27 +72,6 @@ void *find_page(size_t size)
 }
 
 
-void *find_block(size_t size)
-{
-		int page = 0; 
-		PAGE_NUMBER(size, page) 
-				pt_page_h page_head = array[page].page_h; 
-		while (page_head->full)
-				page_head = page_head->next_h; 
-		pt_block block =  page_head->next; 
-		while (block->next && !block->free)
-				block = block->next;
-		if (!(block->next && block->free))
-		{
-				page_head->full = 1; 
-				return new_page(page_head, page);
-				//     page_head->free = 0; 
-		}
-		page_head->size += (BLOCK_SIZE + size); 
-		block->free = 0;
-		return block->limit; 
-}
-
 
 
 void *new_page(pt_page_h head, int page_number)
@@ -104,9 +85,10 @@ void *new_page(pt_page_h head, int page_number)
 		tmp_s->full = 0; 
 		tmp_s->head_page = (pt_block)tmp_s; 
 		tmp_s->next = (pt_block)(tmp_s->limit + size_page_block(page_number));
+  tmp_s->next->head = tmp_s; 
 		tmp_s->next_h = NULL; 
 		//     tmp_s->free = 1; 
-		segment_page(size_page_block(page_number), tmp_s->next); 
+		segment_page(size_page_block(page_number),tmp_s); 
 		tmp_s->next->free = 0; 
 		return tmp_s->next; 
 }
@@ -123,20 +105,47 @@ void create_pages(void)
 				array[i].page_h->full = 0; 
 				// array[i].page_h->free = 1;
 				array[i].page_h->next = (pt_block)(array[i].page_h->limit + array[i].size);
+    array[i].page_h->next->head = array[i].page_h; 
 				array[i].page_h->next_h = NULL;
 		}
 		for (unsigned int i = 0; i < 7; i++)
-				segment_page(array[i].size, (array[i].page_h->next));
+				segment_page(array[i].size, array[i].page_h);
 }
 
-void segment_page(size_t size, pt_block block_add)
+void *find_block(size_t size)
+{
+          int page = 0; 
+          PAGE_NUMBER(size, page) 
+          pt_page_h page_head = array[page].page_h; 
+          while (page_head->full)
+                    page_head = page_head->next_h; 
+          pt_block block =  page_head->next; 
+          while (block->next && !block->free)
+                    block = block->next;
+          if (!(block->next && block->free))
+                {
+                    page_head->full = 1; 
+                    return new_page(page_head, page);
+                              //     page_head->free = 0; 
+                }
+          page_head->size += (BLOCK_SIZE + size); 
+          block->free = 0;
+          return block->limit; 
+}
+
+
+void segment_page(size_t size, pt_page_h head)
 { 
 		size_t  counter = 1;  
-		pt_block block = block_add; 
+		pt_block block = head->next; 
 		while (counter < NBR_BLOCK(size))
 		{
 				block->free = 1; 
+    block->head = head; 
 				block->next = (pt_block)(block->limit + size); 
+       printf (":::::::::::::: HEAD %p :::::::::::::::::\n",block->head); 
+        printf (":::::::::::::: BLOCK PTR%p :::::::::::::::::\n",block);
+      printf (":::::::::::::: PTR %p :::::::::::::::::\n",block->limit); 
 				block = block->next; 
 				counter++; 
 		}

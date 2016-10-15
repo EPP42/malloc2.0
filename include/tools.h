@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include "malloc.h"
 
-void segment_page(size_t size, pt_block block_add); 
+void segment_page(size_t size, pt_page_h head); 
 long size_page_block (int index); 
 void create_pages(void); 
 void *allocate_block(int page_number); 

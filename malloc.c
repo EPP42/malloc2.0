@@ -54,15 +54,11 @@ void *malloc(size_t size)
 void free(void *ptr)
 {
 		if (ptr)
-		{
-				int tmp = (int)ptr; 
-				tmp = (tmp<<21)>>21; 
-				pt_page_h head = (pt_page_h) ((char*)ptr - tmp); 
-				head->full = 0; 
-				head->free = 1; 
-				pt_block block = (pt_block)((char*)ptr - 16); 
-				block->free = 1; 
-		}
+        {
+            pt_block block = (pt_block)((char*)ptr - 24); 
+            block->head->full = 0;
+            block->free = 1; 
+		      }
 }
 
 		__attribute__((__visibility__("default")))
