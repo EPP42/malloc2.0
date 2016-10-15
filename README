@@ -1,0 +1,51 @@
+MALLOC PROJECT
+--------------
+A basic  malloc implemented using best fit technic. 
+
+DEPENDENCIE: 
+		sys/man.h library
+		malloc.h
+
+FUNCTION DESCRIPTION: 
+
+NAME
+		malloc calloc realloc -- allocate memory by block 
+		free -- freed memory block 
+LIBRARY 
+		malloc.h
+SYNOPSIS
+		void *
+		------ malloc(void *ptr); 
+		------ realloc(void *ptr, size_t size); 
+		------ calloc(size_t, size_t);
+
+		void
+		------ free(void *ptr); 
+
+DESCRIPTION:
+		Malloc function use best fit combine with first fit algorithm depending on
+		the asking size.
+		Malloc take one argument a size. This size is align on 4bytes if it's not.
+
+		Calloc take two size the first is the type size and the second the number of
+		elment of this size you want to allocate. Calloc set the memory block at 0; 
+
+		realloc this function tries to change the size of the old memory block
+		pointed by ptr. size is the new reallocated block size that we want. 
+		If you pass a NULL value to realloc and a size, if this size is zero realloc
+		allocates a 8 memory block else if a greater size is given  a pointer on
+		an align block of the asking size is return.   
+
+		free take a pointer in 
+		
+RETURN VALUE 
+		If successful, malloc, calloc, realloc return a pointer to allocated momery
+		block. In other case a NULL pointer. 
+
+NOTE
+		Malloc function doesn't free NULL pointer and if a zero size is given malloc
+		return a 8 size block; 
+
+OTHERS FUNCTION : 
+
+
