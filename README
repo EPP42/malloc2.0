@@ -25,9 +25,9 @@ SYNOPSIS
 DESCRIPTION:
 		Malloc function use best fit combine with first fit algorithm depending on
 		the asking size.
-		Malloc take one argument a size. This size is align on 4bytes if it's not.
+		Malloc takes one argument a size. This size is align on 4 bytes if it's not.
 
-		Calloc take two size the first is the type size and the second the number of
+		Calloc take two sizes the first is the type size and the second the number of
 		elment of this size you want to allocate. Calloc set the memory block at 0; 
 
 		realloc this function tries to change the size of the old memory block
