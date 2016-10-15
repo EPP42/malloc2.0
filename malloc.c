@@ -33,10 +33,10 @@ void *allocate_page (size_t size)
                     first = 1; 
                     array[7].page_h = mmap(NULL, size + HEAD_SIZE, PROT_WRITE | PROT_READ, MAP_ANON | MAP_PRIVATE, 0, 0);
                     array[7].page_h->head_page = (pt_block)array[7].page_h; 
-                    array[7].page_h->full = 0; 
                     array[7].page_h->next_h = NULL; 
                     array[7].page_h->next = (pt_block)array[7].page_h->limit; 
                     array[7].page_h->next->free = 0; 
+                    array[7].page_h->free = 0; 
                     array[7].page_h->next->next = NULL; 
                     array[7].page_h->size = size + HEAD_SIZE; 
                     return array[7].page_h->next->limit; 
@@ -48,6 +48,7 @@ void *allocate_page (size_t size)
                               tmp_s = tmp_s->next_h; 
                     tmp_s->next_h =  mmap(NULL, size + HEAD_SIZE, PROT_WRITE 
                                           | PROT_READ, MAP_ANON | MAP_PRIVATE, 0, 0);
+                    tmp_s->free = 0; 
                     tmp_s = tmp_s->next_h; 
                      tmp_s->size = size + HEAD_SIZE; 
                     tmp_s->next_h = NULL; 
@@ -57,6 +58,21 @@ void *allocate_page (size_t size)
                 }
 }
 
+void *find_page(size_t size)
+{
+          pt_page_h head = array[7].page_h; 
+          while(head && (head->size >= size) && !head->free)// here if the size is zero the block is free 
+                    head = head->next_h; 
+          if (!head)
+                {
+                    printf("MMMMMMM   NEW PAGE  MMMMMMMM\n"); 
+                    head = allocate_page(size);
+                    return head; 
+                }
+           printf("MMMMMMM  REUSEIT MMMMMMMM\n"); 
+          return head->next->limit; 
+}
+
 void *malloc(size_t size)
 {
           static int first = 0; 
@@ -64,7 +80,7 @@ void *malloc(size_t size)
           if (first)
                 {
                     if (size > 512)
-                              return allocate_page(size); 
+                              return find_page(size); 
                     else
                               return find_block(size);  
                 }
@@ -73,7 +89,7 @@ void *malloc(size_t size)
                     first = 1; 
                     create_pages(); 
                     if ( size > 512)
-                              return allocate_page(size); 
+                              return find_page(size); 
                     else
                               return find_block(size); 
                 }
@@ -119,6 +135,7 @@ void free(void *ptr)
 				pt_page_h head = (pt_page_h) (ptr - tmp); 
 				printf("::::::::::::::: FREE PAGEHEAD : %p :::::::::::::::::::::::: \n", head); 
 				head->full = 0; 
+    head->free = 1; 
 				pt_block block = (pt_block)(ptr - 16); 
 				block->free = 1; 
 		}

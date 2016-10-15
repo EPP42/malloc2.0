@@ -56,6 +56,7 @@ struct head
 {
 		int full;// 
   size_t size;  
+  int free; 
 		pt_block head_page;// save the page head add// need able to free  
 		pt_block next; 
 		pt_page_h next_h; // save the address head next block 
@@ -70,4 +71,5 @@ void *allocate_block(int page_number);
 void free(void *ptr); 
 void *new_page(pt_page_h head, int page_number); 
 void *find_block(size_t size); 
+
 #endif 
