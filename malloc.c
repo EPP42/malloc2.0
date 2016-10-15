@@ -5,74 +5,17 @@
 #include <unistd.h>
 #include <assert.h>
 #include <limits.h>
+#include "tools.h"
+#include  <string.h>
 #include "malloc.h"
 #define LIBFOO_DLL_EXPORTED  __attribute__((visibility("default")))
 
 // var static
 
-static struct page array[8]; 
+extern struct page array[8]; 
 // 16 // 32 // 64 // 128 // 512 //
 
-
-
-
-long size_page_block (int index)
-{
-          static int size[8] = {8, 16, 32, 64, 128, 256, 512};
-          if (0 < index && index < 8)
-                    return size[index]; 
-          else
-                    return PAGE_SIZE; 
-}
-
-void *allocate_page (size_t size)
-{
-          static int first = 0; 
-          if (!first)
-                {
-                    first = 1; 
-                    array[7].page_h = mmap(NULL, size + HEAD_SIZE, PROT_WRITE | PROT_READ, MAP_ANON | MAP_PRIVATE, 0, 0);
-                    array[7].page_h->head_page = (pt_block)array[7].page_h; 
-                    array[7].page_h->next_h = NULL; 
-                    array[7].page_h->next = (pt_block)array[7].page_h->limit; 
-                    array[7].page_h->next->free = 0; 
-                    array[7].page_h->free = 0; 
-                    array[7].page_h->next->next = NULL; 
-                    array[7].page_h->size = size + HEAD_SIZE; 
-                    return array[7].page_h->next->limit; 
-                }
-          else
-                {
-                    pt_page_h tmp_s = array[7].page_h; 
-                    while(tmp_s->next_h)
-                              tmp_s = tmp_s->next_h; 
-                    tmp_s->next_h =  mmap(NULL, size + HEAD_SIZE, PROT_WRITE 
-                                          | PROT_READ, MAP_ANON | MAP_PRIVATE, 0, 0);
-                    tmp_s->free = 0; 
-                    tmp_s = tmp_s->next_h; 
-                     tmp_s->size = size + HEAD_SIZE; 
-                    tmp_s->next_h = NULL; 
-                    tmp_s->next = (pt_block)array[7].page_h->limit; 
-                    tmp_s->next->free = 0; 
-                    return tmp_s->next->limit; 
-                }
-}
-
-void *find_page(size_t size)
-{
-          pt_page_h head = array[7].page_h; 
-          while(head && (head->size >= size) && !head->free)// here if the size is zero the block is free 
-                    head = head->next_h; 
-          if (!head)
-                {
-                    printf("MMMMMMM   NEW PAGE  MMMMMMMM\n"); 
-                    head = allocate_page(size);
-                    return head; 
-                }
-           printf("MMMMMMM  REUSEIT MMMMMMMM\n"); 
-          return head->next->limit; 
-}
-
+__attribute__((__visibility__("default")))
 void *malloc(size_t size)
 {
           static int first = 0; 
@@ -95,102 +38,51 @@ void *malloc(size_t size)
                 }
 }
 
-
-
-void *find_block(size_t size)
-{
-		// printf("size: %ld \n::::::",size); 
-		int page = 0; 
-		PAGE_NUMBER(size, page) 
-				pt_page_h page_head = array[page].page_h; 
-		while (page_head->full)
-            page_head = page_head->next_h; 
-		printf("::::::::::::::: MALLOC PAGEHEAD : %p :::::::::::::::::::::::: \n", page_head); 
-		pt_block block =  page_head->next; 
-		while (block->next && !block->free)
-				block = block->next;
-		if (!(block->next && block->free))
-		{
-				printf("||||||||||||||||||||||||||||   NEWPAGE   |||||||||||||||||||||||||||||||||| \n"); 
-				page_head->full = 1; 
-				return new_page(page_head, page);
-				//     page_head->free = 0; 
-
-		}
-  page_head->size = BLOCK_SIZE + size; 
-		block->free = 0;
-		printf (":::::::::  MALLOC   PTR ::::::::::::::: %p ::::::::::: \n", block->limit); 
-		return block->limit; 
-}
-
-
-		__attribute__((__visibility__("default")))
+          /////////// A modifier  trouver solution int for add ////////// 
+          //////////////////////////////////////
+          ////////////////////////////////////
+          ////////////////////////////////
+          /////////////////////////////
+          ////////////////////////
+          ///////////////
+          //////////
+          //////
+          ////
+          //
+__attribute__((__visibility__("default")))
 void free(void *ptr)
 {
-		if (ptr)
-		{
-				printf (":::::::::  FREE  PTR ::::::::::::::: %p ::::::::::: \n", ptr); 
-				int tmp = (int)ptr; 
-				tmp = (tmp<<21)>>21; 
-				pt_page_h head = (pt_page_h) (ptr - tmp); 
-				printf("::::::::::::::: FREE PAGEHEAD : %p :::::::::::::::::::::::: \n", head); 
-				head->full = 0; 
-    head->free = 1; 
-				pt_block block = (pt_block)(ptr - 16); 
-				block->free = 1; 
-		}
+          if (ptr)
+                {
+                    printf (":::::::::  FREE  PTR ::::::::::::::: %p ::::::::::: \n", ptr); 
+                    int tmp = (int)ptr; 
+                    tmp = (tmp<<21)>>21; 
+                    pt_page_h head = (pt_page_h) (ptr - tmp); 
+                    printf("::::::::::::::: FREE PAGEHEAD : %p :::::::::::::::::::::::: \n", head); 
+                    head->full = 0; 
+                    head->free = 1; 
+                    pt_block block = (pt_block)(ptr - 16); 
+                    block->free = 1; 
+                }
 }
 
-void *new_page(pt_page_h head, int page_number)
+__attribute__((__visibility__("default")))
+void *realloc(void *ptr, size_t size)
 {
-		pt_page_h tmp_s = head; 
-		while (tmp_s->next_h)
-				tmp_s = tmp_s->next_h; 
-		printf("::::::::::::::: MALLOC PAGEHEAD : %p :::::::::::::::::::::::: \n",tmp_s); 
-		tmp_s->next_h = mmap(NULL, PAGE_SIZE, PROT_WRITE 
-						| PROT_READ, MAP_PRIVATE | MAP_ANON, 0, 0); 
-		tmp_s = tmp_s->next_h;
-		tmp_s->full = 0; 
-		tmp_s->head_page = (pt_block)tmp_s; 
-		tmp_s->next = (pt_block)(tmp_s->limit + size_page_block(page_number));
-		tmp_s->next_h = NULL; 
-		//     tmp_s->free = 1; 
-		segment_page(size_page_block(page_number), tmp_s->next); 
-		tmp_s->next->free = 0; 
-		return tmp_s->next; 
+          if (!ptr)
+                    return malloc(size); 
+          else if (!size && ptr)
+                {
+                    free(ptr); 
+                    return NULL; 
+                }
+          else
+                    return realloc_block(size, ptr);
 }
-
-
-void create_pages(void)
+__attribute__((__visibility__("default")))
+void *calloc(size_t number, size_t size)
 {
-		for (unsigned int i = 0; i < 7; i++)
-		{
-				array[i].page_h = mmap(NULL, PAGE_SIZE, PROT_WRITE 
-								| PROT_READ, MAP_ANON | MAP_PRIVATE, 0, 0);
-				array[i].size = size_page_block(i); 
-				array[i].page_h->head_page = (pt_block)array[i].page_h; 
-				array[i].page_h->full = 0; 
-				// array[i].page_h->free = 1;
-				array[i].page_h->next = (pt_block)(array[i].page_h->limit + array[i].size);
-				array[i].page_h->next_h = NULL;
-		}
-		for (unsigned int i = 0; i < 7; i++)
-				segment_page(array[i].size, (array[i].page_h->next));
+          void *ptr = malloc(size); 
+          memset(ptr, 0, size); 
+          return ptr; 
 }
-
-void segment_page(size_t size, pt_block block_add)
-{ 
-		size_t  counter = 1;  
-		pt_block block = block_add; 
-		//printf(":::::::::::::::::::::::::::: %ld ::::::::::::::::::::::::::::::::::\n", size); 
-		while (counter < NBR_BLOCK(size))
-		{
-				block->free = 1; 
-				block->next = (pt_block)(block->limit + size); 
-				block = block->next; 
-				counter++; 
-		}
-		//printf("counter : ::::::::::::::::::::::::::%ld::::::::::::::::::::: \n",counter); 
-		block->next = NULL; 
-}
-

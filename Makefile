@@ -1,7 +1,7 @@
 CC= gcc 
-CFLAGS= -g -shared -pedantic -std=c99 -fPIC 
+CFLAGS= -g -shared -pedantic -std=c99 -fPIC -I"include"
 LD_FLAGS= -fPIC   
-SRC= malloc.c  
+SRC= malloc.c tools.c   
 LIB= libmalloc.so 
 VPATH= tests
 LD_VISIBILITY= -fvisibility=hidden
@@ -9,7 +9,7 @@ LD_VISIBILITY= -fvisibility=hidden
 all: libmalloc.so
 
 $(LIB): $(SRC)
-	LD_LIBRARY_PATH=./; $(CC) $(LD_VISIBILITY) $(CFLAGS) $(SRC) -o $@; LD_PRELOAD=./libmalloc.so  
+	@$(CC) $(LD_VISIBILITY) $(CFLAGS) $(SRC) -o $@; LD_PRELOAD=./libmalloc.so 
 
 main: main.c 
 	gcc -g main.c -L. -lmalloc -o my_prog
