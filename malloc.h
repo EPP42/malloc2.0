@@ -11,6 +11,7 @@
 #define PAGE_SIZE  sysconf(_SC_PAGE_SIZE)
 #define BLOCK_SIZE  16
 #define NBR_BLOCK(size) (PAGE_SIZE / ((size)  + BLOCK_SIZE))
+#define HEAD_SIZE sizeof(struct head)
 
 #define PAGE_NUMBER(size, page) \
 		if (0 < size && size <= 8) page= 0;    \
@@ -39,9 +40,10 @@ typedef struct  head* pt_page_h;
 // structure
 struct page
 {
-		int size; 
+		long size; 
 		pt_page_h page_h;  
 };
+
 
 struct block_mem
 {
@@ -53,6 +55,7 @@ struct block_mem
 struct head
 {
 		int full;// 
+  size_t size;  
 		pt_block head_page;// save the page head add// need able to free  
 		pt_block next; 
 		pt_page_h next_h; // save the address head next block 
@@ -61,7 +64,7 @@ struct head
 
 void *malloc(size_t size); 
 void segment_page(size_t size, pt_block block_add); 
-int size_page_block (int index); 
+long size_page_block (int index); 
 void create_pages(void); 
 void *allocate_block(int page_number); 
 void free(void *ptr); 
