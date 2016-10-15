@@ -1,5 +1,5 @@
 CC= gcc 
-CFLAGS= -g -shared -pedantic -std=c99 -fPIC -I"include"
+CFLAGS= -g -shared -pedantic -Wall -Werror -Wextra  -std=c99 -fPIC -I"include"
 LD_FLAGS= -fPIC   
 SRC= malloc.c tools.c   
 LIB= libmalloc.so 

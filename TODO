@@ -1,0 +1,12 @@
+malloc :
+function first fit and best fit algorithm DONE . 
+
+free :
+function tested DONE . 
+have to modifi (int cast)
+realloc : 
+ function tested DONE. 
+calloc 
+function tested DONE. 
+SPEED test TODO. 
+
