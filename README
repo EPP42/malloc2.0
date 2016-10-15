@@ -1,6 +1,6 @@
 MALLOC PROJECT
 --------------
-A basic  malloc implemented using best fit technic. 
+A basic  malloc implemented using best fit and first fit algorithm. 
 
 DEPENDENCIE: 
 		sys/man.h library
