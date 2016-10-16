@@ -48,4 +48,29 @@ NOTE
 
 OTHERS FUNCTION : 
 
+LIBRARY 
+		tools.h
+SYNOPSIS
+		void *
+		-------
+		   find_block(size_t size); 
+			 find_page(size_t size); 
+  void
+	-----
+				segment_page(size_t size, pt_page_h head)
+DESCRIPTION
+				FIND_PAGE this function is used for big allocation, if the user asked
+				for a block greater than 512 bytes, FIND_PAGE allocate a PAGE_SIZE bytes
+						of memory and return a pointer on this area. 
 
+				FIND_BLOCK this function search a free block in a page. The size
+				argument is between 0 or 512 bytes. if FIND_BLOCK find a free block it
+				return a pointer on this block. 
+
+				SEGMENT_PAGE segment a page pointed by head (aka struct page*) in block
+				of size size. 
+
+RETURN VALUE
+				return ptr on the memory block else return NULL if (mmap) function
+				return -1 (NO MEMORY)
+		

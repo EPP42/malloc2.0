@@ -25,7 +25,9 @@ void *allocate_page (size_t size)
 		if (first == 2)
 		{
 				first = 3; 
-				array[7].page_h = mmap(NULL, size + HEAD_SIZE, PROT_WRITE | PROT_READ, MAP_ANON | MAP_PRIVATE, 0, 0);
+				if ((array[7].page_h = mmap(NULL, size + HEAD_SIZE, PROT_WRITE 
+                             | PROT_READ, MAP_ANON | MAP_PRIVATE, 0, 0)) == (void*)-1)
+      return NULL; 
 				array[7].page_h->head_page = (pt_block)array[7].page_h; 
 				array[7].page_h->next_h = NULL; 
 				array[7].page_h->next = (pt_block)array[7].page_h->limit; 
@@ -38,12 +40,12 @@ void *allocate_page (size_t size)
 		}
 		else
 		{
-      printf ("NEW PAGE \n"); 
 				pt_page_h tmp_s = array[7].page_h; 
 				while(tmp_s->next_h)
 						tmp_s = tmp_s->next_h; 
-				tmp_s->next_h =  mmap(NULL, size + HEAD_SIZE, PROT_WRITE 
-								| PROT_READ, MAP_ANON | MAP_PRIVATE, 0, 0);
+			if ((	tmp_s->next_h =  mmap(NULL, size + HEAD_SIZE, PROT_WRITE 
+								| PROT_READ, MAP_ANON | MAP_PRIVATE, 0, 0)) == (void*) -1)
+             return NULL; 
 				tmp_s->free = 0; 
 				tmp_s = tmp_s->next_h; 
 				tmp_s->size = size + HEAD_SIZE; 
@@ -73,8 +75,9 @@ void *new_page(pt_page_h head, int page_number)
 		pt_page_h tmp_s = head; 
 		while (tmp_s->next_h)
 				tmp_s = tmp_s->next_h; 
-		tmp_s->next_h = mmap(NULL, PAGE_SIZE, PROT_WRITE 
-						| PROT_READ, MAP_PRIVATE | MAP_ANON, 0, 0); 
+		if ((tmp_s->next_h = mmap(NULL, PAGE_SIZE, PROT_WRITE 
+						| PROT_READ, MAP_PRIVATE | MAP_ANON, 0, 0)) == (void*)-1)
+            return NULL; 
 		tmp_s = tmp_s->next_h;
 		tmp_s->full = 0; 
 		tmp_s->head_page = (pt_block)tmp_s; 
