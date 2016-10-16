@@ -1,4 +1,4 @@
-IMPORTANT: handle error cases TO DO
+IMPORTANT: handle error cases DONE
 malloc :
 function first fit and best fit algorithm DONE . 
 
@@ -9,5 +9,15 @@ realloc :
  function tested DONE. 
 calloc 
 function tested DONE. 
-SPEED test TODO. 
+SPEED test DONE 
+. 
+ Recycle DONE 
+ 9 Extended realloc(3) DONE 
+ 10 Advanced realloc(3) DONE 
+ prepared to handle every case.
+ 11 Speed   TO DO
+ 12 Memory footprint DONE 
+ 13 Recompile self DONE 
+ 14  read-safe DONE 
+16 Corruption proof TODO 
 
