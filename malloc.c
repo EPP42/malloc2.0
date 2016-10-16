@@ -12,12 +12,12 @@
 
 // var static
 extern struct page array[8]; 
+extern int first[7];  
 // 16 // 32 // 64 // 128 // 512 //
 
 		__attribute__((__visibility__("default")))
 void *malloc(size_t size)
 {
-   static int first[7] = {0}; 
    int page_number = 0; 
    PAGE_NUMBER(size, page_number);        
 		size = ALIGN_BSIZE((size)); 

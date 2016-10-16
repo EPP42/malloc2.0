@@ -9,7 +9,7 @@
 #define LIBFOO_DLL_EXPORTED  __attribute__((visibility("default")))
 
 struct page array[8]; 
-
+int first[7] = {0}; 
 long size_page_block (int index)
 {
 		static int size[8] = {8, 16, 32, 64, 128, 256, 512};
@@ -22,10 +22,10 @@ long size_page_block (int index)
           // allocate a page for the function find new block 
 void *allocate_page (size_t size)
 {
-		static int first = 0; 
-		if (!first)
+		static int first = 2; 
+		if (first == 2)
 		{
-				first = 1; 
+				first = 3; 
 				array[7].page_h = mmap(NULL, size + HEAD_SIZE, PROT_WRITE | PROT_READ, MAP_ANON | MAP_PRIVATE, 0, 0);
 				array[7].page_h->head_page = (pt_block)array[7].page_h; 
 				array[7].page_h->next_h = NULL; 
@@ -85,7 +85,7 @@ void *new_page(pt_page_h head, int page_number)
 		//     tmp_s->free = 1; 
 		segment_page(size_page_block(page_number),tmp_s); 
 		tmp_s->next->free = 0; 
-		return tmp_s->next; 
+		return tmp_s->next->limit; 
 }
 
 
@@ -107,7 +107,13 @@ void *find_block(size_t size)
           int page = 0; 
           PAGE_NUMBER(size, page) 
           pt_page_h page_head = array[page].page_h; 
-          while (page_head->full)
+          if (!array[page].page_h)
+                {
+                    first[page] = 1; 
+                    create_pages(page); 
+                    return new_page(array[page].page_h, page);
+                }
+          while (page_head->full && page_head->next_h)
                     page_head = page_head->next_h; 
           pt_block block =  page_head->next; 
           while (block->next && !block->free)
@@ -115,7 +121,7 @@ void *find_block(size_t size)
           if (!(block->next && block->free))
                 {
                     page_head->full = 1; 
-                    return new_page(page_head, page);
+                    return new_page(array[page].page_h, page);
                 }
           block->free = 0;
           return block->limit; 
@@ -157,7 +163,7 @@ void *realloc_block(size_t size, void *ptr)
 {
 		size = ALIGN_BSIZE(size);
 		void* tmp = ((char *)ptr - 24); 
-          pt_block block = (pt_block) (tmp); 
+   pt_block block = (pt_block) (tmp); 
 		if (block->head->size >= 512)
 				return handle_page(block->head, ptr, size);
 		else
@@ -166,11 +172,11 @@ void *realloc_block(size_t size, void *ptr)
 						return ptr;
 				void *new_ptr = NULL;
 				if (size > 512)
-						new_ptr = find_page(size); 
+					  	new_ptr = find_page(size); 
 				else
-						new_ptr = find_block(size); 
-				memmove(new_ptr, ptr, size);
-				free(ptr); 
-				return new_ptr; 
-		}
+              new_ptr = find_block(size); 
+              memmove(new_ptr, ptr, size);
+              free(ptr); 
+     return new_ptr; 
+  }
 }
