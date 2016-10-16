@@ -23,6 +23,7 @@ long size_page_block (int index)
 				return PAGE_SIZE; 
 }
 
+          // allocate a page for the function find new black 
 void *allocate_page (size_t size)
 {
 		static int first = 0; 
@@ -42,6 +43,7 @@ void *allocate_page (size_t size)
 		}
 		else
 		{
+      printf ("NEW PAGE \n"); 
 				pt_page_h tmp_s = array[7].page_h; 
 				while(tmp_s->next_h)
 						tmp_s = tmp_s->next_h; 
@@ -51,29 +53,26 @@ void *allocate_page (size_t size)
 				tmp_s = tmp_s->next_h; 
 				tmp_s->size = size + HEAD_SIZE; 
 				tmp_s->next_h = NULL; 
-				tmp_s->next = (pt_block)array[7].page_h->limit; 
+				tmp_s->next = (pt_block)(tmp_s->limit); 
     tmp_s->next->head = tmp_s; 
 				tmp_s->next->free = 0; 
 				return tmp_s->next->limit; 
 		}
 }
 
+          // this function search a free page else create a new free page 
 void *find_page(size_t size)
 {
 		pt_page_h head = array[7].page_h; 
-		while(head && (head->size >= size) && !head->free)// here if the size is zero the block is free 
-				head = head->next_h; 
-		if (!head)
-		{
-				head = allocate_page(size);
-				return head; 
-		}
+		while(head && (head->size >= size) && !head->free)
+				    head = head->next_h; 
+  if (!head)
+         return allocate_page(size);    
 		return head->next->limit; 
 }
 
-
-
-
+          //if there no more space this function create a new 
+          //page use with the best fit algorithm
 void *new_page(pt_page_h head, int page_number)
 {
 		pt_page_h tmp_s = head; 
@@ -94,22 +93,18 @@ void *new_page(pt_page_h head, int page_number)
 }
 
 
-void create_pages(void)
+void create_pages(const int page_number)
 {
-		for (unsigned int i = 0; i < 7; i++)
-		{
-				array[i].page_h = mmap(NULL, PAGE_SIZE, PROT_WRITE 
+          array[page_number].page_h = mmap(NULL, PAGE_SIZE, PROT_WRITE 
 								| PROT_READ, MAP_ANON | MAP_PRIVATE, 0, 0);
-				array[i].size = size_page_block(i); 
-				array[i].page_h->head_page = (pt_block)array[i].page_h; 
-				array[i].page_h->full = 0; 
-				// array[i].page_h->free = 1;
-				array[i].page_h->next = (pt_block)(array[i].page_h->limit + array[i].size);
-    array[i].page_h->next->head = array[i].page_h; 
-				array[i].page_h->next_h = NULL;
-		}
-		for (unsigned int i = 0; i < 7; i++)
-				segment_page(array[i].size, array[i].page_h);
+          array[page_number].size = size_page_block(page_number); 
+          array[page_number].page_h->head_page = (pt_block)array[page_number].page_h; 
+          array[page_number].page_h->full = 0; 
+                    // array[i].page_h->free = 1;
+          array[page_number].page_h->next = (pt_block)(array[page_number].page_h->limit + array[page_number].size);
+          array[page_number].page_h->next->head = array[page_number].page_h; 
+          array[page_number].page_h->next_h = NULL;
+          segment_page(array[page_number].size, array[page_number].page_h);
 }
 
 void *find_block(size_t size)

@@ -18,10 +18,11 @@ extern struct page array[8];
 		__attribute__((__visibility__("default")))
 void *malloc(size_t size)
 {
-		printf(" Head size : %ld \n",HEAD_SIZE); 
-		static int first = 0; 
+   static int first[7] = {0}; 
+   int page_number = 0; 
+   PAGE_NUMBER(size, page_number);        
 		size = ALIGN_BSIZE((size)); 
-		if (first)
+		if (first[page_number])
 		{
 				if (size > 512)
 						return find_page(size); 
@@ -30,12 +31,14 @@ void *malloc(size_t size)
 		}
 		else
 		{
-				first = 1; 
-				create_pages(); 
+      first[page_number] = 1;  
 				if ( size > 512)
 						return find_page(size); 
 				else
-						return find_block(size); 
+          {
+               create_pages(page_number); 
+					        	return find_block(size); 
+          }
 		}
 }
 

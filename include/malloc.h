@@ -9,7 +9,7 @@
 
 #define ALIGN_BSIZE(size) ((((((size) - 1)>>2)<<2) + 4))
 #define PAGE_SIZE  sysconf(_SC_PAGE_SIZE)
-#define BLOCK_SIZE  16
+#define BLOCK_SIZE  sizeof(struct block_mem)
 #define NBR_BLOCK(size) (PAGE_SIZE / ((size)  + BLOCK_SIZE))
 #define HEAD_SIZE sizeof(struct head)
 
@@ -48,6 +48,7 @@ struct page
 struct block_mem
 {
 		int free; 
+  pt_page_h head; 
 		pt_block next;
 		char limit[1]; 
 }; 
