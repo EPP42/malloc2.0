@@ -4,15 +4,14 @@
 // library 
 #include <stddef.h>
 
-
 // Macro
-
 #define ALIGN_BSIZE(size) ((((((size) - 1)>>2)<<2) + 4))
 #define PAGE_SIZE  sysconf(_SC_PAGE_SIZE)
 #define BLOCK_SIZE  sizeof(struct block_mem)
 #define NBR_BLOCK(size) (PAGE_SIZE / ((size)  + BLOCK_SIZE))
 #define HEAD_SIZE sizeof(struct head)
 
+          // the page number in function 
 #define PAGE_NUMBER(size, page) \
 		if (0 < size && size <= 8) page= 0;    \
 if (8 < size && size <= 16) page= 1;  \
@@ -22,11 +21,6 @@ if (64 <size && size <= 128) page = 4;   \
 if (128 < size && size <= 256) page = 5;\
 if (256 < size && size <= 512)  page = 6; \
 if (size > 512) page = 7; 
-
-
-#define INDEX_ARRAY(size, page)\
-
-
 
 // Macro 
 #define NO_MORE_SPACE 3 
@@ -43,7 +37,6 @@ struct page
 		long size; 
 		pt_page_h page_h;  
 };
-
 
 struct block_mem
 {
@@ -62,10 +55,11 @@ struct head
 		pt_block next; 
 		pt_page_h next_h; // save the address head next block 
 		char limit[1]; 
-}; 
+};
+
+          // function prototypes 
 void free(void *ptr); 
 void *malloc(size_t size);
 void *calloc(size_t number, size_t size); 
 void *realloc(void *ptr, size_t size); 
-
 #endif 

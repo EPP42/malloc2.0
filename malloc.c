@@ -11,7 +11,6 @@
 #define LIBFOO_DLL_EXPORTED  __attribute__((visibility("default")))
 
 // var static
-
 extern struct page array[8]; 
 // 16 // 32 // 64 // 128 // 512 //
 
@@ -42,17 +41,6 @@ void *malloc(size_t size)
 		}
 }
 
-/////////// A modifier  trouver solution int for add ////////// 
-//////////////////////////////////////
-////////////////////////////////////
-////////////////////////////////
-/////////////////////////////
-////////////////////////
-///////////////
-//////////
-//////
-////
-//
 		__attribute__((__visibility__("default")))
 void free(void *ptr)
 {
