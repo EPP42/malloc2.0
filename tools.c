@@ -8,10 +8,6 @@
 #include "tools.h"
 #define LIBFOO_DLL_EXPORTED  __attribute__((visibility("default")))
 
-// var static
-
-
-
 struct page array[8]; 
 
 long size_page_block (int index)
@@ -23,7 +19,7 @@ long size_page_block (int index)
 				return PAGE_SIZE; 
 }
 
-          // allocate a page for the function find new black 
+          // allocate a page for the function find new block 
 void *allocate_page (size_t size)
 {
 		static int first = 0; 
@@ -64,7 +60,7 @@ void *allocate_page (size_t size)
 void *find_page(size_t size)
 {
 		pt_page_h head = array[7].page_h; 
-		while(head && (head->size >= size) && !head->free)
+		while(head && (head->size <= size) && !head->free)
 				    head = head->next_h; 
   if (!head)
          return allocate_page(size);    
@@ -100,7 +96,6 @@ void create_pages(const int page_number)
           array[page_number].size = size_page_block(page_number); 
           array[page_number].page_h->head_page = (pt_block)array[page_number].page_h; 
           array[page_number].page_h->full = 0; 
-                    // array[i].page_h->free = 1;
           array[page_number].page_h->next = (pt_block)(array[page_number].page_h->limit + array[page_number].size);
           array[page_number].page_h->next->head = array[page_number].page_h; 
           array[page_number].page_h->next_h = NULL;
@@ -121,13 +116,10 @@ void *find_block(size_t size)
                 {
                     page_head->full = 1; 
                     return new_page(page_head, page);
-                              //     page_head->free = 0; 
                 }
-          page_head->size += (BLOCK_SIZE + size); 
           block->free = 0;
           return block->limit; 
 }
-
 
 void segment_page(size_t size, pt_page_h head)
 { 
@@ -138,10 +130,7 @@ void segment_page(size_t size, pt_page_h head)
 				block->free = 1; 
     block->head = head; 
 				block->next = (pt_block)(block->limit + size); 
-       printf (":::::::::::::: HEAD %p :::::::::::::::::\n",block->head); 
-        printf (":::::::::::::: BLOCK PTR%p :::::::::::::::::\n",block);
-      printf (":::::::::::::: PTR %p :::::::::::::::::\n",block->limit); 
-				block = block->next; 
+    block = block->next; 
 				counter++; 
 		}
 		block->next = NULL; 
@@ -149,8 +138,8 @@ void segment_page(size_t size, pt_page_h head)
 
 void *handle_page(pt_page_h head, void *ptr, size_t size)
 {
-		long diff  = (((head->size % PAGE_SIZE) + 1) * PAGE_SIZE) - ((size - head->size) + size);
-		if (diff <= 0)
+		long diff  =  ((((head->size) / PAGE_SIZE) + 1) * PAGE_SIZE) -  size;
+		if (diff >= 0)
 		{
 				head->size = size + HEAD_SIZE; 
 				return head->next->limit; 
@@ -167,14 +156,13 @@ void *handle_page(pt_page_h head, void *ptr, size_t size)
 void *realloc_block(size_t size, void *ptr)
 {
 		size = ALIGN_BSIZE(size);
-		int tmp = (int)ptr; 
-		tmp = (tmp<<21)>>21; 
-		pt_page_h head = (pt_page_h) (ptr);
-		if (head->size >= 512)
-				return handle_page(head, ptr, size);
+		void* tmp = ((char *)ptr - 24); 
+          pt_block block = (pt_block) (tmp); 
+		if (block->head->size >= 512)
+				return handle_page(block->head, ptr, size);
 		else
 		{
-				if (head->size >= size)
+				if (block->head->size >= size)
 						return ptr;
 				void *new_ptr = NULL;
 				if (size > 512)
@@ -186,5 +174,3 @@ void *realloc_block(size_t size, void *ptr)
 				return new_ptr; 
 		}
 }
-
-
