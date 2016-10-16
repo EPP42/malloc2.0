@@ -16,8 +16,8 @@ extern int first[7];
 		__attribute__((__visibility__("default")))
 void *malloc(size_t size)
 {
-   int page_number = 0; 
-   PAGE_NUMBER(size, page_number);        
+		int page_number = 0; 
+		PAGE_NUMBER(size, page_number);        
 		size = ALIGN_BSIZE((size)); 
 		if (first[page_number])
 		{
@@ -28,14 +28,14 @@ void *malloc(size_t size)
 		}
 		else
 		{
-      first[page_number] = 1;  
+				first[page_number] = 1;  
 				if ( size > 512)
 						return find_page(size); 
 				else
-          {
-               create_pages(page_number); 
-					        	return find_block(size); 
-          }
+				{
+						create_pages(page_number); 
+						return find_block(size); 
+				}
 		}
 }
 
@@ -43,11 +43,11 @@ void *malloc(size_t size)
 void free(void *ptr)
 {
 		if (ptr)
-        {
-            pt_block block = (pt_block)((char*)ptr - 24); 
-            block->head->full = 0;
-            block->free = 1; 
-		      }
+		{
+				pt_block block = (pt_block)((char*)ptr - 24); 
+				block->head->full = 0;
+				block->free = 1; 
+		}
 }
 
 		__attribute__((__visibility__("default")))
