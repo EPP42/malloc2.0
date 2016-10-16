@@ -1,9 +1,7 @@
 #define _GNU_SOURCE
-#include <stdio.h>
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <assert.h>
 #include <limits.h>
 #include "tools.h"
 #include  <string.h>
