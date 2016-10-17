@@ -1,5 +1,5 @@
 CC= gcc 
-CFLAGS= -g -shared -pedantic -Wall -Werror -Wextra  -std=c99 -fPIC -I"include"
+CFLAGS= -shared -pedantic -Wall -Werror -Wextra  -std=c99 -fPIC -I"include"
 LD_FLAGS= -fPIC   
 SRC= malloc.c tools.c   
 LIB= libmalloc.so 
@@ -9,16 +9,12 @@ LD_VISIBILITY= -fvisibility=hidden
 all: libmalloc.so
 
 $(LIB): $(SRC)
-	@$(CC) $(LD_VISIBILITY) $(CFLAGS) $(SRC) -o $@; LD_PRELOAD=./libmalloc.so 
+	@$(CC) $(LD_VISIBILITY) $(CFLAGS) $(SRC) -o $@
 
-main: main.c 
-	gcc -g main.c -L. -lmalloc -o my_prog
-
+check: all
+	@cp -f  $(LIB) tests;cd tests; LD_PRELOAD=./$(LIB); LD_LIBRARY_PATH=.; ./tests_suit.sh;   
 clean: 
-	@rm -rf $(OBJS)
-
-mrproper: 
 	@rm -rf $(LIB)
 
-.PHONY: clean mrproper
+.PHONY: clean
 
